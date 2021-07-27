@@ -33,9 +33,9 @@
     <main>
         <h1>Goal of the Day</h1>
         <div id="date-container">
-            <button>Jour precedant</button>
-            <span>26 Juillet 2021</span>
-            <button>Jour suivant</button>
+            <button id="prev-day">Jour precedant</button>
+            <span id="date">26 Juillet 2021</span>
+            <button id="next-day">Jour suivant</button>
         </div>
 
         <div id="goals-box">
@@ -134,6 +134,7 @@
         border-radius: 10px;
         padding: 8px;
         color: white;
+        cursor: pointer;
     }
 
     #date-container button:hover {
@@ -179,7 +180,7 @@
 
     .todo svg {
         margin-left: auto;
-        cursor:pointer;
+        cursor: pointer;
     }
 
     .todo svg:hover {

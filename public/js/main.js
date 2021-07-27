@@ -1,3 +1,7 @@
+const options = { year: 'numeric', month: 'long', day: 'numeric' };
+const date = new Date();
+updateDate(date);
+
 window.addEventListener('load', function () {
 
     document.getElementById("submit-goal").onclick = (e) => {
@@ -5,7 +9,21 @@ window.addEventListener('load', function () {
         document.getElementById("goal-text").value = ""
     }
 
+    document.getElementById("next-day").onclick = (e) => {
+        date.setDate(date.getDate() + 1);
+        updateDate(date);
+    }
+
+    document.getElementById("prev-day").onclick = (e) => {
+        date.setDate(date.getDate() - 1);
+        updateDate(date);
+    }
+
 })
+
+function updateDate(date) {
+    document.getElementById("date").innerHTML = date.toLocaleDateString('fr-FR', options);
+}
 
 function deleteGoal(svg) {
     socket.emit('goals/remove', svg.parentNode.children[1].innerHTML);
@@ -36,3 +54,5 @@ socket.on('goals/get', (msg) => {
         addGoal(todo.text);
     });
 })
+
+
