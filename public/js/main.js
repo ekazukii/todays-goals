@@ -1,17 +1,16 @@
 window.addEventListener('load', function () {
 
     document.getElementById("submit-goal").onclick = (e) => {
-        addGoal(document.getElementById("goal-text").value);
+        socket.emit('goals/add', document.getElementById("goal-text").value);
         document.getElementById("goal-text").value = ""
     }
 
 })
 
-
 function deleteGoal(svg) {
-    console.log(svg)
-    svg.parentNode.remove();
+    socket.emit('goals/remove', svg.parentNode.children[1].innerHTML);
 }
+
 
 function addGoal(text) {
     document.getElementById("checkboxs").insertAdjacentHTML('beforeend', '<div class="todo">'
@@ -22,3 +21,18 @@ function addGoal(text) {
     );
 }
 
+function clear() {
+    document.getElementById("checkboxs").innerHTML = '';
+}
+
+
+var socket = io();
+
+socket.emit('goals/get');
+
+socket.on('goals/get', (msg) => {
+    clear()
+    msg.forEach(todo => {
+        addGoal(todo.text);
+    });
+})
