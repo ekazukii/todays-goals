@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today's goal</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="nav-container" id="navbar">
+            <nav>
+                
+                <div class="home">
+                    <a href="https://ekazuki.fr">Eka'</a>
+                </div>
+
+                <div class="left">
+                    <a href="https://twitter.com/ekazukiii" class="social-link" target="_blank">
+                        <div>Twitter</div>
+                    </a>
+                    <a href="https://github.com/ekazukii" class="social-link" target="_blank">
+                        <div>Github</div></a>
+                </div>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <h1>Goal of the Day</h1>
+        <div id="date-container">
+            <button>Jour precedant</button>
+            <span>26 Juillet 2021</span>
+            <button>Jour suivant</button>
+        </div>
+
+        <div id="goals-box">
+            <h2>Todo List</h2>
+            <div id="checkboxs">
+                <div class="todo">
+                    <div class="checkbox"></div>
+                    <label for="scales">Faire un truc 1</label>
+                </div>
+
+                <div class="todo">
+                    <div class="checkbox"></div>
+                    <label for="scales">Faire un autre truc</label>
+                </div>
+
+                <div class="todo">
+                    <div class="checkbox"></div>
+                    <label for="scales">Faire le dernier truc</label>
+                </div>
+
+                <div id="new-todo">
+                    <textarea name="" id="" cols="30" rows="1"></textarea>
+                    <button>Add goal</button>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+</body>
+
+<style>
+    body {
+        background-color: white;
+        color: black;
+        margin: 0;
+        font-family: 'Lato', sans-serif;
+        font-weight: 300;
+    }
+
+    .nav-container {
+        background-color: #050505;
+        opacity: 0.96;
+        height: 5em;
+        width: 100%;
+        display: flex;
+        align-items: stretch;
+        flex-wrap: wrap;
+    }
+
+    nav {
+        display: flex;
+        font-weight: 400;
+
+        font-size: 2em;
+        justify-content: center;   
+        align-items: center; 
+
+        margin-left: 30px;
+        margin-right: 30px;
+
+        width: 100%;
+        color: white;
+    }
+
+    nav .left {
+        font-weight: 300;
+        margin-left: auto;
+        display: flex;
+    }
+
+    nav .left div{
+        margin-left: 20px;
+    }
+
+    nav a {
+        text-decoration: none;
+        color: white;
+    }
+
+    nav a:hover {
+        text-decoration: underline;
+    }
+
+    .home a {
+        font-family: 'Roboto Slab', serif;
+        color: #E76F51;
+    }
+    
+    h1 {
+        font-family: 'Roboto Slab', serif;
+        font-size: 3em;
+        color: #E76F51;
+        text-align: center;
+    }
+
+    #date-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        font-size: 1.2em;
+        margin-right: 30vw;
+        margin-left: 30vw;
+    }
+
+    #date-container button {
+        background-color: #7289da;
+        border: none;
+        border-radius: 10px;
+        padding: 8px;
+        color: white;
+    }
+
+    #date-container button:hover {
+        background-color: #4E6AD0;
+    }
+
+    #goals-box {
+        font-size: 1.4em;
+        border: 1px solid black;
+        width: 30%;
+        margin: auto;
+        padding: auto;
+        padding: 20px;
+        aspect-ratio: 1.2;
+
+        margin-top: 80px;
+    }
+
+    h2 {
+        text-align: center;
+    }
+
+    #checkboxs {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .todo {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .checkbox {
+        width: 1em;
+        height: 1em;
+        border: 1px solid black;
+    }
+
+    .todo label {
+        margin-left: 10px;
+    }
+
+    #new-todo {
+        display: flex;
+        align-items: center;
+    }
+
+    #new-todo textarea {
+        flex-grow: 1;
+        margin-right: 10px;
+        font-size: 1em;
+        font-family: 'Lato', sans-serif;
+        font-weight: 300;
+    }
+
+    #new-todo button {
+        min-height: 3vh;
+        max-height: 5vh;
+    }
+
+
+
+</style>
+</html>
