@@ -6,6 +6,9 @@ var fs = require("fs");
 var app = express();
 var port = 3001;
 
+const http = require('http');
+const server = http.createServer(app);
+
 //app.use(helmet());
 
 app.use(logger('common', {
@@ -24,7 +27,7 @@ app.use('/css', express.static(path.join(__dirname, 'public/css')));
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
 app.use('/', express.static(path.join(__dirname, 'public/favicons')));
 
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
 });
   
