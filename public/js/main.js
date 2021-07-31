@@ -5,28 +5,38 @@ updateDate(date);
 window.addEventListener('load', function () {
 
     document.getElementById("submit-goal").onclick = (e) => {
-        socket.emit('goals/add', document.getElementById("goal-text").value);
+        socket.emit('goals/add', {
+            text: document.getElementById("goal-text").value,
+            date: date.toISOString().slice(0,10).replace(/-/g,"")
+        });
         document.getElementById("goal-text").value = ""
     }
 
     document.getElementById("next-day").onclick = (e) => {
         date.setDate(date.getDate() + 1);
         updateDate(date);
+        socket.emit('goals/get', date.toISOString().slice(0,10).replace(/-/g,""));
     }
 
     document.getElementById("prev-day").onclick = (e) => {
         date.setDate(date.getDate() - 1);
         updateDate(date);
+        socket.emit('goals/get', date.toISOString().slice(0,10).replace(/-/g,""));
     }
 
 })
+
+console.log(date.toISOString().slice(0,10).replace(/-/g,""))
 
 function updateDate(date) {
     document.getElementById("date").innerHTML = date.toLocaleDateString('fr-FR', options);
 }
 
 function deleteGoal(svg) {
-    socket.emit('goals/remove', svg.parentNode.children[1].innerHTML);
+    socket.emit('goals/remove', {
+        text: svg.parentNode.children[1].innerHTML,
+        date: date.toISOString().slice(0,10).replace(/-/g,"")
+    });
 }
 
 
@@ -46,7 +56,7 @@ function clear() {
 
 var socket = io();
 
-socket.emit('goals/get');
+socket.emit('goals/get', date.toISOString().slice(0,10).replace(/-/g,""));
 
 socket.on('goals/get', (msg) => {
     clear()

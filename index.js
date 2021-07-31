@@ -14,29 +14,48 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
-let tasks = [
-    {id: 1, text: "This is goal number one"},
-    {id: 2, text: "This is the second task"},
-    {id: 3, text: "Here's the last todo"}
-]
+let tasks = {
+    "20210731": [
+        {id: 1, text: "This is goal number one"},
+        {id: 2, text: "This is the second task"},
+        {id: 3, text: "Here's the last todo"}
+    ]
+}
 
 io.on('connection', (socket) => {
     console.log('a user connected');
 
-    socket.on('goals/get', (msg) => {
-        io.emit('goals/get', tasks);
+    /**
+     * date = "YYYYMMDD"
+     */
+    socket.on('goals/get', (date) => {
+        io.emit('goals/get', tasks[date]);
     })
 
+    /**
+     * msg = {
+     *   text: "Todo text"
+     *   date: "YYYYMMDD"
+     * }
+     */
     socket.on('goals/add', (msg) => {
-        tasks.push({id: uuidv4(), text: msg});
-        io.emit('goals/get', tasks);
+        if(tasks[msg.date] == undefined) {tasks[msg.date] = []}
+        tasks[msg.date].push({id: uuidv4(), text: msg.text});
+        io.emit('goals/get', tasks[msg.date]);
     })
 
+    /**
+     * msg = {
+     *   text: "Todo text"
+     *   id: "UUIDV4"
+     *   date: "YYYYMMDD"
+     * }
+     */
     socket.on('goals/remove', (msg) => {
-        tasks = tasks.filter(task => {
-            return (task.id !== msg && task.text !== msg);
+        tasks[msg.date] = tasks[msg.date].filter(task => {
+            return (task.id !== msg.id && task.text !== msg.text);
         });
-        io.emit('goals/get', tasks);
+        io.emit('goals/get', tasks[msg.date]);
     })
 });
 
