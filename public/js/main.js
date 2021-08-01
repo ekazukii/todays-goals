@@ -1,5 +1,6 @@
 const options = { year: 'numeric', month: 'long', day: 'numeric' };
 const date = new Date();
+console.log(date)
 updateDate(date);
 
 window.addEventListener('load', function () {
@@ -7,26 +8,24 @@ window.addEventListener('load', function () {
     document.getElementById("submit-goal").onclick = (e) => {
         socket.emit('goals/add', {
             text: document.getElementById("goal-text").value,
-            date: date.toISOString().slice(0,10).replace(/-/g,"")
+            date: formatDate(date)
         });
         document.getElementById("goal-text").value = ""
     }
 
     document.getElementById("next-day").onclick = (e) => {
-        date.setDate(date.getDate() + 1);
+        //date.setDate(date.getDate() + 1);
         updateDate(date);
-        socket.emit('goals/get', date.toISOString().slice(0,10).replace(/-/g,""));
+        socket.emit('goals/get', formatDate(date));
     }
 
     document.getElementById("prev-day").onclick = (e) => {
-        date.setDate(date.getDate() - 1);
+        //date.setDate(date.getDate() - 1);
         updateDate(date);
-        socket.emit('goals/get', date.toISOString().slice(0,10).replace(/-/g,""));
+        socket.emit('goals/get', formatDate(date));
     }
 
 })
-
-console.log(date.toISOString().slice(0,10).replace(/-/g,""))
 
 function updateDate(date) {
     document.getElementById("date").innerHTML = date.toLocaleDateString('fr-FR', options);
@@ -35,7 +34,7 @@ function updateDate(date) {
 function deleteGoal(svg) {
     socket.emit('goals/remove', {
         text: svg.parentNode.children[1].innerHTML,
-        date: date.toISOString().slice(0,10).replace(/-/g,"")
+        date: formatDate(date)
     });
 }
 
@@ -56,7 +55,7 @@ function clear() {
 
 var socket = io();
 
-socket.emit('goals/get', date.toISOString().slice(0,10).replace(/-/g,""));
+socket.emit('goals/get', formatDate(date));
 
 socket.on('goals/get', (msg) => {
     clear()
@@ -64,5 +63,20 @@ socket.on('goals/get', (msg) => {
         addGoal(todo.text);
     });
 })
+
+function formatDate(date) {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) 
+        month = '0' + month;
+    if (day.length < 2) 
+        day = '0' + day;
+
+    return [year, month, day].join('');
+}
+ 
 
 

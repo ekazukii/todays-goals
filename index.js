@@ -3,16 +3,34 @@ var path = require("path");
 var logger = require('morgan');
 var fs = require("fs");
 const { v4: uuidv4 } = require('uuid');
+var sqlite3 = require('sqlite3').verbose();
+
 
 // Create http express server
 var app = express();
 var port = 3001;
 const http = require('http');
 const server = http.createServer(app);
+var db = new sqlite3.Database(':memory:');
 
 // Socket io
 const { Server } = require("socket.io");
 const io = new Server(server);
+db.serialize(function() {
+    db.get("PRAGMA foreign_keys = ON")
+    db.run("CREATE TABLE IF NOT EXISTS Users (userId INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, timezone TEXT)");
+    db.run("CREATE TABLE IF NOT EXISTS Tasks (taskId TEXT PRIMARY KEY, userId INTEGER, date TEXT, text TEXT, color TEXT, checked INT, FOREIGN KEY(userId) REFERENCES Users(userId))");
+    db.run("CREATE TABLE IF NOT EXISTS SharedTasks (sharedId TEXT PRIMARY KEY, sharerId INTEGER, receiverId INTEGER, text TEXT, color TEXT, FOREIGN KEY(receiverId) REFERENCES Users(userId), FOREIGN KEY(sharerId) REFERENCES Users(userId))");
+
+    db.run('INSERT INTO Users (email, timezone) VALUES ("contact@ekazuki.fr", "FRANCE/PARIS")')
+    db.run('INSERT INTO Tasks (taskId, userId, date, text, color, checked) VALUES ("niels", 1, "20210801", "This is goal number one", "black", 0)');
+    db.run('INSERT INTO Tasks (taskId, userId, date, text, color, checked) VALUES ("niels2", 1, "20210801", "This is goal number one", "black", 0)');
+    db.run('INSERT INTO Tasks (taskId, userId, date, text, color, checked) VALUES ("niels3", 1, "20210801", "Here\'s the last todo f", "black", 0)');
+    console.log("niels")
+
+
+
+});
 
 let tasks = {
     "20210731": [
@@ -29,7 +47,9 @@ io.on('connection', (socket) => {
      * date = "YYYYMMDD"
      */
     socket.on('goals/get', (date) => {
-        io.emit('goals/get', tasks[date]);
+        db.all('SELECT * FROM Tasks WHERE userId = ? AND date = ?', [1, date], (err, rows) => {
+            io.emit('goals/get', rows);
+        })
     })
 
     /**
@@ -39,9 +59,13 @@ io.on('connection', (socket) => {
      * }
      */
     socket.on('goals/add', (msg) => {
-        if(tasks[msg.date] == undefined) {tasks[msg.date] = []}
-        tasks[msg.date].push({id: uuidv4(), text: msg.text});
-        io.emit('goals/get', tasks[msg.date]);
+        db.serialize(function() {
+            db.run('INSERT INTO Tasks (taskId, userId, date, text, color, checked) VALUES (?, 1, ?, ?, "black", 0)', [uuidv4(), msg.date, msg.text]);
+
+            db.all('SELECT * FROM Tasks WHERE userId = ? AND date = ?', [1, msg.date], (err, rows) => {
+                io.emit('goals/get', rows);
+            })
+        })
     })
 
     /**
@@ -52,10 +76,13 @@ io.on('connection', (socket) => {
      * }
      */
     socket.on('goals/remove', (msg) => {
-        tasks[msg.date] = tasks[msg.date].filter(task => {
-            return (task.id !== msg.id && task.text !== msg.text);
-        });
-        io.emit('goals/get', tasks[msg.date]);
+        db.serialize(function() {
+            db.run('DELETE FROM Tasks WHERE text = ?', msg.text)
+
+            db.all('SELECT * FROM Tasks WHERE userId = ? AND date = ?', [1, msg.date], (err, rows) => {
+                io.emit('goals/get', rows);
+            })
+        })
     })
 });
 
