@@ -1,6 +1,6 @@
 const options = { year: 'numeric', month: 'long', day: 'numeric' };
-const date = new Date();
-console.log(date)
+let date = new Date();
+var socket = io();
 updateDate(date);
 
 window.addEventListener('load', function () {
@@ -8,36 +8,52 @@ window.addEventListener('load', function () {
     document.getElementById("submit-goal").onclick = (e) => {
         socket.emit('goals/add', {
             text: document.getElementById("goal-text").value,
-            date: formatDate(date)
+            date: formatDate(date),
+            sessId: localStorage.getItem("sessionId")
         });
         document.getElementById("goal-text").value = ""
     }
 
     document.getElementById("next-day").onclick = (e) => {
-        //date.setDate(date.getDate() + 1);
+        date.setDate(date.getDate() + 1);
         updateDate(date);
-        socket.emit('goals/get', formatDate(date));
+        refreshTasks()
     }
 
     document.getElementById("prev-day").onclick = (e) => {
-        //date.setDate(date.getDate() - 1);
+        date.setDate(date.getDate() - 1);
         updateDate(date);
-        socket.emit('goals/get', formatDate(date));
+        refreshTasks()
     }
+
+    if(localStorage.getItem("sessionId")) {
+        refreshTasks()
+    } else {
+        console.log("should not be called")
+        socket.emit("google/auth", "contact@ekazuki.fr");
+    }   
 
 })
 
-function updateDate(date) {
-    document.getElementById("date").innerHTML = date.toLocaleDateString('fr-FR', options);
-}
+socket.on('goals/get', (msg) => {
+    clear()
+    msg.forEach(todo => {
+        addGoal(todo.text);
+    });
+})
+
+socket.on("auth/session", (sessId) => {
+    localStorage.setItem("sessionId", sessId)
+    refreshTasks();
+});
 
 function deleteGoal(svg) {
     socket.emit('goals/remove', {
         text: svg.parentNode.children[1].innerHTML,
-        date: formatDate(date)
+        date: formatDate(date),
+        sessId: localStorage.getItem("sessionId")
     });
 }
-
 
 function addGoal(text) {
     document.getElementById("checkboxs").insertAdjacentHTML('beforeend', '<div class="todo">'
@@ -48,21 +64,18 @@ function addGoal(text) {
     );
 }
 
-function clear() {
-    document.getElementById("checkboxs").innerHTML = '';
+function refreshTasks() {
+    socket.emit('goals/get', {date: formatDate(date), sessId: localStorage.getItem("sessionId")});
+}
+
+function updateDate(date) {
+    document.getElementById("date").innerHTML = date.toLocaleDateString('fr-FR', options);
 }
 
 
-var socket = io();
-
-socket.emit('goals/get', formatDate(date));
-
-socket.on('goals/get', (msg) => {
-    clear()
-    msg.forEach(todo => {
-        addGoal(todo.text);
-    });
-})
+function clear() {
+    document.getElementById("checkboxs").innerHTML = '';
+}
 
 function formatDate(date) {
     var d = new Date(date),
@@ -91,3 +104,6 @@ function onSignIn(googleUser) {
     var id_token = googleUser.getAuthResponse().id_token;
     socket.emit("google/auth", id_token);
 }
+
+//socket.emit("google/auth", "baptisteloison8400@gmail")
+//socket.emit("test", "baptisteloison8400@gmail")

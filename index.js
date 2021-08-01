@@ -24,6 +24,7 @@ db.serialize(function() {
     db.run("CREATE TABLE IF NOT EXISTS Users (userId INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, timezone TEXT)");
     db.run("CREATE TABLE IF NOT EXISTS Tasks (taskId TEXT PRIMARY KEY, userId INTEGER, date TEXT, text TEXT, color TEXT, checked INT, FOREIGN KEY(userId) REFERENCES Users(userId))");
     db.run("CREATE TABLE IF NOT EXISTS SharedTasks (sharedId TEXT PRIMARY KEY, sharerId INTEGER, receiverId INTEGER, text TEXT, color TEXT, FOREIGN KEY(receiverId) REFERENCES Users(userId), FOREIGN KEY(sharerId) REFERENCES Users(userId))");
+    db.run("CREATE TABLE IF NOT EXISTS Sessions (sessionId TEXT PRIMARY KEY, userId INTEGER, FOREIGN KEY(userId) REFERENCES Users(userId))")
 
     db.run('INSERT INTO Users (email, timezone) VALUES ("contact@ekazuki.fr", "FRANCE/PARIS")')
     db.run('INSERT INTO Tasks (taskId, userId, date, text, color, checked) VALUES ("niels", 1, "20210801", "This is goal number one", "black", 0)');
@@ -48,10 +49,11 @@ io.on('connection', (socket) => {
 
     /**
      * date = "YYYYMMDD"
+     * sessId: UUIDV4
      */
-    socket.on('goals/get', (date) => {
-        db.all('SELECT * FROM Tasks WHERE userId = ? AND date = ?', [1, date], (err, rows) => {
-            io.emit('goals/get', rows);
+    socket.on('goals/get', (msg) => {
+        getUserId(msg.sessId).then((userId) => {
+            sendTasks(userId, msg.date)
         })
     })
 
@@ -59,39 +61,73 @@ io.on('connection', (socket) => {
      * msg = {
      *   text: "Todo text"
      *   date: "YYYYMMDD"
+     *   sessId: UUIDV4
      * }
      */
     socket.on('goals/add', (msg) => {
-        db.serialize(function() {
-            db.run('INSERT INTO Tasks (taskId, userId, date, text, color, checked) VALUES (?, 1, ?, ?, "black", 0)', [uuidv4(), msg.date, msg.text]);
-
-            db.all('SELECT * FROM Tasks WHERE userId = ? AND date = ?', [1, msg.date], (err, rows) => {
-                io.emit('goals/get', rows);
-            })
+        getUserId(msg.sessId).then((userId) => {
+            db.run('INSERT INTO Tasks (taskId, userId, date, text, color, checked) VALUES (?, ?, ?, ?, "black", 0)', [uuidv4(), userId, msg.date, msg.text], () => {
+                sendTasks(userId, msg.date)
+            });
         })
     })
-
-    socket.on("google/auth", (msg) => {
-        verify(msg);
-    });
-
     /**
      * msg = {
      *   text: "Todo text"
      *   id: "UUIDV4"
      *   date: "YYYYMMDD"
+     *   sessId: UUIDV4
      * }
      */
     socket.on('goals/remove', (msg) => {
-        db.serialize(function() {
-            db.run('DELETE FROM Tasks WHERE text = ?', msg.text)
-
-            db.all('SELECT * FROM Tasks WHERE userId = ? AND date = ?', [1, msg.date], (err, rows) => {
-                io.emit('goals/get', rows);
+        getUserId(msg.sessId).then((userId) => {
+            console.log(msg.text);
+            db.run('DELETE FROM Tasks WHERE text = ?', [msg.text], () => {
+                sendTasks(userId, msg.date)
             })
         })
     })
+
+    socket.on("google/auth", (msg) => {
+        //verify(msg);
+        db.serialize(() => {
+            db.run("INSERT OR IGNORE INTO Users (email) VALUES (?)", msg);
+            db.get("SELECT userId FROM Users WHERE email = ?", msg, (err, res) => {
+                let sessId = uuidv4();
+                db.run("INSERT INTO Sessions (sessionId, userId) VALUES (?, ?)", [sessId, res.userId])
+                socket.emit("auth/session", sessId);
+            });
+        })
+    });
+
+    socket.on("test", (msg) => {
+        setTimeout(() => {
+            db.all("SELECT * FROM Users", (err, rows) => {
+                console.log(rows)
+            })
+        }, 10000)
+    })
+
 });
+
+function sendTasks(userId, date) {
+    db.all('SELECT * FROM Tasks WHERE userId = ? AND date = ?', [userId, date], (err, rows) => {
+        io.emit('goals/get', rows);
+    })
+}
+
+function getUserId(sessionId) {
+    return new Promise((resolve, reject) => {
+        db.get('SELECT userId FROM Sessions WHERE sessionId = ?', sessionId, (err, row) => {
+            if(row?.userId) {
+                resolve(row.userId)
+            } else {
+                console.error("No session found")
+                reject(new Error("No session found"))
+            }
+        })
+    })
+}
 
 async function verify(token) {
   const ticket = await client.verifyIdToken({
