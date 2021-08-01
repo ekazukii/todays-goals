@@ -4,6 +4,9 @@ var logger = require('morgan');
 var fs = require("fs");
 const { v4: uuidv4 } = require('uuid');
 var sqlite3 = require('sqlite3').verbose();
+const {OAuth2Client} = require('google-auth-library');
+const CLIENT_ID = "595427916137-78nfjo08g37j3jscvsrl9o1b6nbaaj1l.apps.googleusercontent.com";
+const client = new OAuth2Client(CLIENT_ID);
 
 
 // Create http express server
@@ -68,6 +71,10 @@ io.on('connection', (socket) => {
         })
     })
 
+    socket.on("google/auth", (msg) => {
+        verify(msg);
+    });
+
     /**
      * msg = {
      *   text: "Todo text"
@@ -85,6 +92,21 @@ io.on('connection', (socket) => {
         })
     })
 });
+
+async function verify(token) {
+  const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
+      // Or, if multiple clients access the backend:
+      //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+  });
+  const payload = ticket.getPayload();
+  const userid = payload['sub'];
+
+  console.log(payload)
+  // If request specified a G Suite domain:
+  // const domain = payload['hd'];
+}
 
 //app.use(helmet());
 
