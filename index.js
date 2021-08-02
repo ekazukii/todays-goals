@@ -88,15 +88,17 @@ io.on('connection', (socket) => {
         })
     })
 
-    socket.on("google/auth", (msg) => {
+    socket.on("google/auth", (tokenId) => {
         //verify(msg);
-        db.serialize(() => {
-            db.run("INSERT OR IGNORE INTO Users (email) VALUES (?)", msg);
-            db.get("SELECT userId FROM Users WHERE email = ?", msg, (err, res) => {
-                let sessId = uuidv4();
-                db.run("INSERT INTO Sessions (sessionId, userId) VALUES (?, ?)", [sessId, res.userId])
-                socket.emit("auth/session", sessId);
-            });
+        getEmail(tokenId).then(email => {
+            db.serialize(() => {
+                db.run("INSERT OR IGNORE INTO Users (email) VALUES (?)", email);
+                db.get("SELECT userId FROM Users WHERE email = ?", email, (err, res) => {
+                    let sessId = uuidv4();
+                    db.run("INSERT INTO Sessions (sessionId, userId) VALUES (?, ?)", [sessId, res.userId])
+                    socket.emit("auth/session", sessId);
+                });
+            })
         })
     });
 
@@ -129,19 +131,17 @@ function getUserId(sessionId) {
     })
 }
 
-async function verify(token) {
-  const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
-      // Or, if multiple clients access the backend:
-      //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
-  });
-  const payload = ticket.getPayload();
-  const userid = payload['sub'];
-
-  console.log(payload)
-  // If request specified a G Suite domain:
-  // const domain = payload['hd'];
+async function getEmail(token) {
+    return new Promise((resolve, reject) => {
+        client.verifyIdToken({
+            idToken: token,
+            audience: CLIENT_ID
+        }).then(ticker => {
+            resolve(ticker.getPayload()["email"])
+        }).catch(err => {
+            reject(err);
+        })
+    })
 }
 
 //app.use(helmet());

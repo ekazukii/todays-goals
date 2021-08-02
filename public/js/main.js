@@ -29,8 +29,16 @@ window.addEventListener('load', function () {
     if(localStorage.getItem("sessionId")) {
         refreshTasks()
     } else {
+        //auth2.currentUser.get().getBasicProfile();
+        if(gapi.auth2.isSignedIn) {
+            var id_token = gapi.auth2.currentUser.get().getAuthResponse().id_token;
+            console.log(id_token)
+            socket.emit("google/auth", id_token)
+        } else {
+            document.getElementById("goal-box-login").style.display = "block";
+            document.getElementById("goals-box").style.display = "none";
+        }
         console.log("should not be called")
-        socket.emit("google/auth", "contact@ekazuki.fr");
     }   
 
 })
@@ -91,19 +99,23 @@ function formatDate(date) {
     return [year, month, day].join('');
 }
  
-
-
-
-function onSignIn(googleUser) {
-    var profile = googleUser.getBasicProfile();
-    console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-    console.log('Name: ' + profile.getName());
-    console.log('Image URL: ' + profile.getImageUrl());
-    console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
-
+function onGoogleSignIn(googleUser) {
     var id_token = googleUser.getAuthResponse().id_token;
     socket.emit("google/auth", id_token);
 }
+
+function googleSignOut() {
+    var auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(function () {
+      console.log('User signed out.');
+    });
+}
+
+function sessionLogOut() {
+    localStorage.removeItem("sessionId");
+    console.log('Session signed out.');
+}
+
 
 //socket.emit("google/auth", "baptisteloison8400@gmail")
 //socket.emit("test", "baptisteloison8400@gmail")
