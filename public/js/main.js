@@ -3,15 +3,33 @@ let date = new Date();
 var socket = io();
 updateDate(date);
 
+let guest = false;
+
 window.addEventListener('load', function () {
 
     document.getElementById("submit-goal").onclick = (e) => {
-        socket.emit('goals/add', {
-            text: document.getElementById("goal-text").value,
-            date: formatDate(date),
-            sessId: localStorage.getItem("sessionId")
-        });
-        document.getElementById("goal-text").value = ""
+        if(guest) {
+            let tasksJSON = localStorage.getItem(formatDate(date));
+            let tasks = []
+            if(tasksJSON) { // Add task
+                tasks = JSON.parse(tasksJSON);
+            } 
+
+            tasks.push({
+                text: document.getElementById("goal-text").value,
+                checked: false
+            });
+
+            localStorage.setItem(formatDate(date), JSON.stringify(tasks))
+            refreshTasks();
+        } else {
+            socket.emit('goals/add', {
+                text: document.getElementById("goal-text").value,
+                date: formatDate(date),
+                sessId: localStorage.getItem("sessionId")
+            });
+            document.getElementById("goal-text").value = ""
+        }
     }
 
     document.getElementById("next-day").onclick = (e) => {
@@ -31,8 +49,19 @@ window.addEventListener('load', function () {
         googleSignOut();
     }
 
+    document.getElementById("guest-div").onclick = (e) => {
+        //localStorage.setItem("guest", "true");
+        guest = true;
+
+        document.getElementById("goal-box-login").style.display = "none";
+        document.getElementById("goals-box").style.display = "block";
+        refreshTasks();
+    }
+
     if(localStorage.getItem("sessionId")) {
         refreshTasks()
+        document.getElementById("logout-div").style.display = "flex";
+        document.getElementById("login-div").style.display = "none";
     } else {
         //auth2.currentUser.get().getBasicProfile();
         if(gapi.auth2.isSignedIn) {
@@ -70,28 +99,49 @@ socket.on("auth/session", (sessId) => {
 
 function updateGoal(checkbox) {
     let checked = checkbox.hasChildNodes() ? 0 : 1;
-    console.log(checked)
-    socket.emit('goals/update', {
-        text: checkbox.parentNode.children[1].innerHTML,
-        date: formatDate(date),
-        sessId: localStorage.getItem("sessionId"),
-        checked: checked
-    })
-    /** 
-    if(checkbox.hasChildNodes()) {
+    if(guest) {
+        let tasksJSON = localStorage.getItem(formatDate(date));
+        let tasks = []
+        if(tasksJSON) { // Add task
+            tasks = JSON.parse(tasksJSON);
+            let index = tasks.findIndex((task) => {
+                return task.text == checkbox.parentNode.children[1].innerHTML
+            })
+            tasks[index].checked = checked;
+            localStorage.setItem(formatDate(date), JSON.stringify(tasks))
 
-        checkbox.innerHTML = '';
+            refreshTasks();
+        } 
     } else {
-        checkbox.innerHTML = '<p>X</p>';
-    }*/
+        socket.emit('goals/update', {
+            text: checkbox.parentNode.children[1].innerHTML,
+            date: formatDate(date),
+            sessId: localStorage.getItem("sessionId"),
+            checked: checked
+        })
+    }
 }
 
 function deleteGoal(svg) {
-    socket.emit('goals/remove', {
-        text: svg.parentNode.children[1].innerHTML,
-        date: formatDate(date),
-        sessId: localStorage.getItem("sessionId")
-    });
+    if(guest) {
+        let text = svg.parentNode.children[1].innerHTML;
+        let tasksJSON = localStorage.getItem(formatDate(date));
+        if(tasksJSON) {
+            tasks = JSON.parse(tasksJSON);
+            let ntasks = tasks.filter(task => {
+                console.log(task.text != text)
+                return task.text != text;
+            })
+            localStorage.setItem(formatDate(date), JSON.stringify(ntasks))
+            refreshTasks();
+        }
+    } else {
+        socket.emit('goals/remove', {
+            text: svg.parentNode.children[1].innerHTML,
+            date: formatDate(date),
+            sessId: localStorage.getItem("sessionId")
+        });
+    }
 }
 
 function addGoal(text, checked) {
@@ -113,7 +163,18 @@ function addGoal(text, checked) {
 }
 
 function refreshTasks() {
-    socket.emit('goals/get', {date: formatDate(date), sessId: localStorage.getItem("sessionId")});
+    if(guest) {
+        clear()
+        let tasksJSON = localStorage.getItem(formatDate(date));
+        if(tasksJSON) {
+            let tasks = JSON.parse(tasksJSON);
+            tasks.forEach(todo => {
+                addGoal(todo.text, todo.checked);
+            });
+        }
+    } else {
+        socket.emit('goals/get', {date: formatDate(date), sessId: localStorage.getItem("sessionId")});
+    }
 }
 
 function updateDate(date) {

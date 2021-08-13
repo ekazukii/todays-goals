@@ -63,7 +63,14 @@
         </div>
 
         <div id="goal-box-login">
-            <h2>You need to login before using the tool</h2>
+            <h3>You need to login before using the tool</h3>
+            <div id="login-container">
+                <div class="g-signin2" data-theme="dark" data-onsuccess="onGoogleSignIn" id="login"></div>
+                <div id="guest-div">
+                    <div id="guest">Continue as guest</div>
+                </div>
+            </div>
+ 
         </div>
     </main>
 
@@ -129,6 +136,7 @@
         background-color: #4B89F4;
         padding-left: 20px;
         cursor: pointer;
+        border-radius: 1px;
     }
 
     #logout-svg {
@@ -137,7 +145,7 @@
 
     nav #logout {
         color: white;
-        font-family: 'Roboto,arial,sans-serif;';
+        font-family: Roboto,arial,sans-serif;
         font-size: 0.6em;
         font-weight: 2em;
         line-height: 34px;
@@ -213,6 +221,37 @@
 
         margin-top: 80px;
         display: none;
+    }
+
+    #goal-box-login #login-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #goal-box-login #guest-div {
+        width: 122px;
+        display: flex;
+        justify-content: center;
+        margin-top: 3px;
+        background-color: #79A7F6;
+        cursor: pointer;
+        border-radius: 1px;
+    }
+
+    #goal-box-login #guest-div:hover {
+        background-color: #669AF4;
+    }
+
+    #goal-box-login #guest {
+        color: white;
+        font-family: Roboto,arial,sans-serif;
+        font-size: 0.6em;
+        font-weight: 2em;
+        line-height: 34px;
+        letter-spacing: .21px;
+        height: 36px;
     }
 
     h2 {
