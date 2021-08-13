@@ -26,6 +26,11 @@ window.addEventListener('load', function () {
         refreshTasks()
     }
 
+    document.getElementById("logout-div").onclick = (e) => {
+        sessionLogOut();
+        googleSignOut();
+    }
+
     if(localStorage.getItem("sessionId")) {
         refreshTasks()
     } else {
@@ -34,9 +39,17 @@ window.addEventListener('load', function () {
             var id_token = gapi.auth2.currentUser.get().getAuthResponse().id_token;
             console.log(id_token)
             socket.emit("google/auth", id_token)
+
+
+            document.getElementById("logout-div").style.display = "flex";
+            document.getElementById("login-div").style.display = "none";
         } else {
+            console.log("I'm NOT SIGNED IN")
             document.getElementById("goal-box-login").style.display = "block";
             document.getElementById("goals-box").style.display = "none";
+
+            document.getElementById("logout-div").style.display = "none";
+            document.getElementById("login-div").style.display = "block";
         }
         console.log("should not be called")
     }   
