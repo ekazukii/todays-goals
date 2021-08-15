@@ -8,26 +8,15 @@ let guest = false;
 window.addEventListener('load', function () {
 
     document.getElementById("submit-goal").onclick = (e) => {
-        if(guest) {
-            let tasksJSON = localStorage.getItem(formatDate(date));
-            let tasks = []
-            if(tasksJSON) { // Add task
-                tasks = JSON.parse(tasksJSON);
-            } 
+        submitGoal(document.getElementById("goal-text").value);
+        document.getElementById("goal-text").value = ""
+    }
 
-            tasks.push({
-                text: document.getElementById("goal-text").value,
-                checked: false
-            });
-
-            localStorage.setItem(formatDate(date), JSON.stringify(tasks))
-            refreshTasks();
-        } else {
-            socket.emit('goals/add', {
-                text: document.getElementById("goal-text").value,
-                date: formatDate(date),
-                sessId: localStorage.getItem("sessionId")
-            });
+    document.getElementById("goal-text").onkeydown = (e) => {
+        evt = e || window.event;
+        if (evt.keyCode == 13) {
+            e.preventDefault()
+            submitGoal(document.getElementById("goal-text").value);
             document.getElementById("goal-text").value = ""
         }
     }
@@ -96,6 +85,31 @@ socket.on("auth/session", (sessId) => {
     localStorage.setItem("sessionId", sessId)
     refreshTasks();
 });
+
+function submitGoal(text) {
+    if(guest) {
+        let tasksJSON = localStorage.getItem(formatDate(date));
+        let tasks = []
+        if(tasksJSON) { // Add task
+            tasks = JSON.parse(tasksJSON);
+        } 
+
+        tasks.push({
+            text: text,
+            checked: false
+        });
+
+        localStorage.setItem(formatDate(date), JSON.stringify(tasks))
+        refreshTasks();
+    } else {
+        socket.emit('goals/add', {
+            text: text,
+            date: formatDate(date),
+            sessId: localStorage.getItem("sessionId")
+        });
+        
+    }
+}
 
 function updateGoal(checkbox) {
     let checked = checkbox.hasChildNodes() ? 0 : 1;
