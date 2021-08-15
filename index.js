@@ -14,7 +14,7 @@ var app = express();
 var port = 3001;
 const http = require('http');
 const server = http.createServer(app);
-var db = new sqlite3.Database(':memory:');
+var db = new sqlite3.Database('tasks.db');
 
 // Socket io
 const { Server } = require("socket.io");
