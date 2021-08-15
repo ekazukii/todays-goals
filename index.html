@@ -74,6 +74,25 @@
         </div>
     </main>
 
+    <footer>
+        <div class="footer-section" id="footer-about">
+            <p><a href="mailto:contact@ekazuki.fr">Contact me</a></p>
+            <p><a href="#">Privacy Policy</a></p>
+            <p><a href="https://github.com/ekazukii/todays-goals" target="__blank">Support on github</a></p>
+        </div>
+        <div class="footer-section" id="other-projects">
+            <div>
+                <p>Check my other projects</p>
+                <ul>
+                    <li><a href="https://ekazuki.fr/project/discord-bot/">Discord Turing Bot</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-section">
+            <h2>Eka'</h2>
+        </div>
+    </footer>
+
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/main.js"></script>
 </body>
@@ -85,6 +104,11 @@
         margin: 0;
         font-family: 'Lato', sans-serif;
         font-weight: 300;
+        /* overscroll-behavior: none; */
+    }
+
+    a {
+        text-underline-offset: 2px;
     }
 
     .nav-container {
@@ -235,13 +259,13 @@
         display: flex;
         justify-content: center;
         margin-top: 3px;
-        background-color: #79A7F6;
+        background-color: #7289da;
         cursor: pointer;
         border-radius: 1px;
     }
 
     #goal-box-login #guest-div:hover {
-        background-color: #669AF4;
+        background-color: #4E6AD0;
     }
 
     #goal-box-login #guest {
@@ -318,6 +342,56 @@
     #new-todo button {
         min-height: 3vh;
         max-height: 5vh;
+    }
+
+    footer {
+        margin-top: 10vh;
+        background-color: #050505;
+        opacity: 0.96;
+        height: 16vh;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+    }
+
+    .footer-section {
+        display: flex;
+        flex-direction: column;
+        color: white;
+        justify-content: space-evenly;
+
+        padding: 20px;
+    }
+
+    .footer-section ul, .footer-section li, .footer-section p {
+        margin: 2px;
+    }
+
+    .footer-section a {
+        color: #7289da;
+    }
+
+    .footer-section h2 {
+        font-family: 'Roboto Slab', serif;
+        color: #E76F51;
+        font-size: 2em;
+    }
+
+    #footer-about a {
+        color: white;
+        text-decoration: none;
+    }
+
+    #footer-about a:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+        #other-projects {
+            display: none;
+        }
+
     }
 
 
