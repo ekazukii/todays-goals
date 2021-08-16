@@ -25,13 +25,6 @@ db.serialize(function() {
     db.run("CREATE TABLE IF NOT EXISTS Tasks (taskId TEXT PRIMARY KEY, userId INTEGER, date TEXT, text TEXT, color TEXT, checked INT, FOREIGN KEY(userId) REFERENCES Users(userId))");
     db.run("CREATE TABLE IF NOT EXISTS SharedTasks (sharedId TEXT PRIMARY KEY, sharerId INTEGER, receiverId INTEGER, text TEXT, color TEXT, FOREIGN KEY(receiverId) REFERENCES Users(userId), FOREIGN KEY(sharerId) REFERENCES Users(userId))");
     db.run("CREATE TABLE IF NOT EXISTS Sessions (sessionId TEXT PRIMARY KEY, userId INTEGER, FOREIGN KEY(userId) REFERENCES Users(userId))")
-
-    db.run('INSERT INTO Users (userId, email, timezone) VALUES (1, "contact@ekazuki.fr", "FRANCE/PARIS")')
-    db.run('INSERT INTO Tasks (taskId, userId, date, text, color, checked) VALUES ("niels", 1, "20210804", "This is goal number one", "black", 0)');
-    db.run('INSERT INTO Tasks (taskId, userId, date, text, color, checked) VALUES ("niels2", 1, "20210804", "This is goal number two", "black", 1)');
-    db.run('INSERT INTO Tasks (taskId, userId, date, text, color, checked) VALUES ("niels3", 1, "20210804", "Here\'s the last todo f", "black", 0)');
-    db.run('INSERT INTO Sessions (sessionId, userId) VALUES (?, 1)', "devsession")
-    console.log("niels")
 });
 
 io.on('connection', (socket) => {
