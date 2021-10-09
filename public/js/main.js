@@ -84,7 +84,8 @@ socket.on('goals/get', (msg) => {
 
 socket.on("auth/session", (sessId) => {
     localStorage.setItem("sessionId", sessId);
-    this.location.reload();
+    //this.location.reload();
+    refreshTasks();
 });
 
 function submitGoal(text) {
