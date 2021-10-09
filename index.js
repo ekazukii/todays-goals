@@ -36,7 +36,7 @@ io.on('connection', (socket) => {
      */
     socket.on('goals/get', (msg) => {
         getUserId(msg.sessId).then((userId) => {
-            sendTasks(userId, msg.date)
+            sendTasks(userId, msg.date, socket)
         })
     })
 
@@ -50,7 +50,7 @@ io.on('connection', (socket) => {
     socket.on('goals/add', (msg) => {
         getUserId(msg.sessId).then((userId) => {
             db.run('INSERT INTO Tasks (taskId, userId, date, text, color, checked) VALUES (?, ?, ?, ?, "black", 0)', [uuidv4(), userId, msg.date, msg.text], () => {
-                sendTasks(userId, msg.date)
+                sendTasks(userId, msg.date, socket)
             });
         })
     })
@@ -66,7 +66,7 @@ io.on('connection', (socket) => {
         getUserId(msg.sessId).then((userId) => {
             console.log(msg.text);
             db.run('DELETE FROM Tasks WHERE text = ?', [msg.text], () => {
-                sendTasks(userId, msg.date)
+                sendTasks(userId, msg.date, socket)
             })
         })
     })
@@ -84,7 +84,7 @@ io.on('connection', (socket) => {
         getUserId(msg.sessId).then((userId) => {
             console.log(msg.text);
             db.run('UPDATE Tasks SET checked = ? WHERE text = ?', [msg.checked, msg.text], () => {
-                sendTasks(userId, msg.date)
+                sendTasks(userId, msg.date, socket)
             })
         })
     })
@@ -113,9 +113,9 @@ io.on('connection', (socket) => {
 
 });
 
-function sendTasks(userId, date) {
+function sendTasks(userId, date, socket) {
     db.all('SELECT * FROM Tasks WHERE userId = ? AND date = ?', [userId, date], (err, rows) => {
-        io.emit('goals/get', rows);
+        socket.emit('goals/get', rows);
     })
 }
 

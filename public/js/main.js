@@ -36,6 +36,7 @@ window.addEventListener('load', function () {
     document.getElementById("logout-div").onclick = (e) => {
         sessionLogOut();
         googleSignOut();
+        this.location.reload();
     }
 
     document.getElementById("guest-div").onclick = (e) => {
@@ -82,8 +83,8 @@ socket.on('goals/get', (msg) => {
 })
 
 socket.on("auth/session", (sessId) => {
-    localStorage.setItem("sessionId", sessId)
-    refreshTasks();
+    localStorage.setItem("sessionId", sessId);
+    this.location.reload();
 });
 
 function submitGoal(text) {
