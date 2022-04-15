@@ -7,11 +7,11 @@ var sqlite3 = require('sqlite3').verbose();
 const {OAuth2Client} = require('google-auth-library');
 const CLIENT_ID = "595427916137-78nfjo08g37j3jscvsrl9o1b6nbaaj1l.apps.googleusercontent.com";
 const client = new OAuth2Client(CLIENT_ID);
-
+const PORT = process.env.PORT;
 
 // Create http express server
 var app = express();
-var port = 3001;
+var port = PORT || 3001;
 const http = require('http');
 const server = http.createServer(app);
 var db = new sqlite3.Database('tasks.db');
