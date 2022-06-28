@@ -1,4 +1,8 @@
-# todays-goals
-Track and manage your daily goal with this webapp.
+# Today's goals
+A minimalist and easy to use task management system to manage your daily goals.
 
-Connect and sync tasks between several locations with Google login or save your tasks locally without sending any private informations to our server. 
+Use it without having to log in to keep your information private on your browser.
+
+Or log in with your google account to synchronize your information between multiple computers
+
+## Anyway go check the [demo here](https://goal.ekazuki.fr/)
